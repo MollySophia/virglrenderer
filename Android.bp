@@ -117,6 +117,7 @@ cc_library {
         "src/drm/drm_renderer.c",
         "src/drm/drm_util.c",
         "src/drm/drm2kgsl/drm2kgsl_renderer.c",
+        "src/drm/mali_kbase_renderer.c",
         "src/mesa/util/anon_file.c",
         "src/mesa/util/bitscan.c",
         "src/mesa/util/hash_table.c",
@@ -194,6 +195,7 @@ cc_library {
                 // Provide a C proto for memfd_create
                 "-D__USE_GNU",
                 "-DHAVE_MEMFD_CREATE=1",
+                "-DHAVE_LINUX_UDMABUF_H=1",
             ],
         },
         android: {
@@ -201,6 +203,7 @@ cc_library {
                 // Provide a C proto for memfd_create
                 "-D__USE_GNU",
                 "-DHAVE_MEMFD_CREATE=1",
+                "-DHAVE_LINUX_UDMABUF_H=1",
             ],
             shared_libs: [
                 "libcutils",

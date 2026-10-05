@@ -10,6 +10,7 @@
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -18,6 +19,9 @@
 #include "drm_hw.h"
 #include "drm_renderer.h"
 #include "drm_util.h"
+#ifdef ENABLE_DRM2KGSL
+#include "mali_kbase_renderer.h"
+#endif
 
 #ifdef ENABLE_DRM2KGSL
 #  include "drm2kgsl/drm2kgsl_renderer.h"
@@ -56,6 +60,16 @@ static const struct backend {
    int (*probe)(int fd, struct virgl_renderer_capset_drm *capset);
    struct virgl_context *(*create)(int fd, size_t debug_len, const char *debug_name);
 } backends[] = {
+#ifdef ENABLE_DRM2KGSL
+   {
+      .context_type = MALI_KBASE_CONTEXT,
+      .name = "mali_kbase",
+      .char_device = true,
+      .node = "/dev/mali0",
+      .probe = mali_kbase_renderer_probe,
+      .create = mali_kbase_renderer_create,
+   },
+#endif
 #ifdef ENABLE_DRM2KGSL
    {
       /* Guest speaks the msm protocol; host bridges it to KGSL. */
@@ -115,6 +129,13 @@ drm_renderer_init(int drm_fd)
    for (unsigned i = 0; i < ARRAY_SIZE(backends); i++) {
       const struct backend *b = &backends[i];
       int fd;
+
+#ifdef ENABLE_DRM2KGSL
+      if (b->context_type == MALI_KBASE_CONTEXT) {
+         const char *opt = getenv("VKR_TEST_KBASE_NATIVE");
+         if (!opt || strcmp(opt, "1")) continue;
+      }
+#endif
 
       /* Character-device backends (drm2kgsl) have no DRM version node; open by
        * path and let the backend fill the capset from its own properties.

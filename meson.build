@@ -105,6 +105,10 @@ if cc.has_header('sys/uio.h')
    conf_data.set('HAVE_SYS_UIO_H', 1)
 endif
 
+if cc.has_header('linux/udmabuf.h')
+   conf_data.set('HAVE_LINUX_UDMABUF_H', 1)
+endif
+
 if cc.has_header('dlfcn.h')
    conf_data.set('HAVE_DLFCN_H', 1)
 endif
